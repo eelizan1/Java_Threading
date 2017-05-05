@@ -22,6 +22,21 @@ public class Main {
                 System.out.println(ANSI_GREEN + "Hello from anonymous class thread");
             }
         }.start();
+        // created a new thread from MyRunnable - passed through as a parameter
+//        Thread myRunnableThread = new Thread(new MyRunnable());
+//        myRunnableThread.start();
+
+        // creating an anonymous class with runnable
+        Thread myRunnableThread = new Thread(new MyRunnable() {
+            @Override
+            public void run() {
+                // executes the run method from the MyRunnable class
+                super.run();
+                // System.out.println(ANSI_RED + "Hello from the anonymous class's implementation of run()");
+            }
+        });
+
+        myRunnableThread.start();
         System.out.println(ANSI_PURPLE + "Hello again from the main thread");
     }
 }
