@@ -14,6 +14,7 @@ public class Main {
         System.out.println(ANSI_PURPLE + "Hello from the main thread");
         // create instance of the thread
         Thread anotherThread = new AnotherThread();
+        anotherThread.setName("== Another Thread ==");
         // use start method to initiate the 'run' method in AnotherThread
         anotherThread.start();
         // creating an anonymous class - used for running things once
@@ -31,12 +32,22 @@ public class Main {
             @Override
             public void run() {
                 // executes the run method from the MyRunnable class
-                super.run();
-                // System.out.println(ANSI_RED + "Hello from the anonymous class's implementation of run()");
+                // super.run();
+                System.out.println(ANSI_RED + "Hello from the anonymous class's implementation of run()");
+                try {
+                    // will wait for anotherThread to finish then run again
+                    // will execute after 3 seconds
+                    // timeout period - will execute if thread be terminates OR at end of timeout period
+                    anotherThread.join(2000);
+                    System.out.println(ANSI_RED + "Another thread terminated, or timed out; so i'm running again");
+                } catch(InterruptedException e) {
+                    System.out.println(ANSI_RED + "I couldn't wait afterall, I was interrupted");
+                }
             }
         });
-
         myRunnableThread.start();
+        // interrupt
+        // anotherThread.interrupt();
         System.out.println(ANSI_PURPLE + "Hello again from the main thread");
     }
 }
