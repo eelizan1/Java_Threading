@@ -7,6 +7,7 @@ package counter;
 // two threads counting down from 10 using a countdown object with synchronization
 public class Main {
     public static void main (String[] args) {
+        // the countdown object needs to be synchronized since it is being shared
         Countdown countdown = new Countdown();
         // instances of CountdownThread class
         CountdownThread thread1 = new CountdownThread(countdown);
@@ -22,9 +23,13 @@ public class Main {
 
 // Countdown class
 class Countdown {
+    // i will be shared amongst thread so use synchronized
+    // note: local variables are stored in the thread stack
+    // So each thread will create a copy of the local variable and each copy has it's own lock
+    // we need threads to compete for the SAME lock - not have their own
     private int i;
     // synchronized - allows thread 1 to finish then proceed to thread 2 which will prevent race conditions with i
-    public synchronized void doCountdown() {
+    public void doCountdown() {
         String color;
         switch(Thread.currentThread().getName()) {
             case "Thread 1":
@@ -36,9 +41,17 @@ class Countdown {
             default:
                 color = ThreadColor.ANSI_GREEN;
         }
-        // the count down
-        for (i = 10; i > 0; i--) {
-            System.out.println(color + Thread.currentThread().getName() + ": " + i);
+        /*
+            CRITICAL SECTION
+        */
+        // synchronized - allows thread 1 to finish then proceed to thread 2
+        // note: ONLY synchronize the code that MUST be synchronized
+        // using 'this' - only one thread can use the for loop at a time
+        // 'this' refers to the current object - synchronize this current countdown object
+        synchronized (this) {
+            for (i = 10; i > 0; i--) {
+                System.out.println(color + Thread.currentThread().getName() + ": " + i);
+            }
         }
     }
 }
@@ -51,7 +64,6 @@ class CountdownThread extends Thread {
         // assign value to field
         threadCountdown = countdown;
     }
-
     // run method
     public void run() {
         // Countdown class method: line 16
