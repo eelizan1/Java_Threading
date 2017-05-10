@@ -1,9 +1,17 @@
-package producer_consumer;
+package producer_consumer_messages;
 
 import java.util.Random;
 
 /*
  * Created by eeliz_000 on 5/6/2017.
+ *
+ *  Process:
+ *      Each thread waits and releases it's lock on the message object when the
+ *      loop condition passes and that gives the other thread the opportunity to run
+ *      It can now process a message and change the value empty variable. When it calls
+ *      the notifyAll method the thread that's waiting can now proceed.
+ *
+ *      Two threads go back and forth until all the messages have been printed
  */
 public class Main {
     public static void main (String[] args) {
@@ -19,10 +27,10 @@ public class Main {
  Synchronize the read and write methods because when a thread is running
  one of these methods, we don't want the other thread to be able to run either method
 
- ex. We don't eant the reader thread to run while the writer thread is writing a message and
+ ex. We don't run the reader thread to run while the writer thread is writing a message and
  vice versa
 
- note: Only ONE synchronized method can run at a time or else one will block the other 
+ note: Only ONE synchronized method can run at a time or else one will block the other
 
  */
 class Message {
@@ -35,10 +43,21 @@ class Message {
     public synchronized String read() {
         // if there's no message to read
         while(empty) {
+            /*
+                when a thread calls a wait method, it will suspend execution
+                an release the locks it'ls holding until another thread issues
+                a notification that something important has happened - other thread issues a notification
+             */
+            try {
+                wait();
+            } catch(InterruptedException e) {
 
+            }
         }
         // set to true to indicate that consumer has read the message
         empty = true;
+        // call notify after thread changes the value of empty
+        notifyAll();
         return message;
     }
 
@@ -48,10 +67,15 @@ class Message {
         // want the consumer to ead each message before we write another one
         // so check if empty before writing
         while(!empty) {
+            try {
+                wait();
+            } catch(InterruptedException e) {
 
+            }
         }
         empty = false;
         this.message = message;
+        notifyAll();
     }
 }
 
